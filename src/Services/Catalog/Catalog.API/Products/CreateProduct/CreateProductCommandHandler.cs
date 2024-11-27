@@ -7,7 +7,8 @@ public record CreateProductCommand(
     string Name,
     List<string> Category,
     string Description,
-    string ImageFile) : ICommand<CreateProductResult>;
+    string ImageFile,
+    decimal Price) : ICommand<CreateProductResult>;
 
 public record CreateProductResult(Guid Id);
 
@@ -20,7 +21,8 @@ internal class CreateProductCommandHandler : ICommandHandler<CreateProductComman
             Name = request.Name,
             Category = request.Category,
             Description = request.Description,
-            ImageFile = request.ImageFile
+            ImageFile = request.ImageFile,
+            Price = request.Price
         };
 
         // save to databse
