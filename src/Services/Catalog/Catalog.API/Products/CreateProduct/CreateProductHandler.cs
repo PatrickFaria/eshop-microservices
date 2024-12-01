@@ -1,5 +1,4 @@
-﻿using BuildingBlocks.CQRS;
-using Catalog.API.Models;
+﻿using Catalog.API.Models;
 
 namespace Catalog.API.Products.CreateProduct;
 
@@ -12,10 +11,12 @@ public record CreateProductCommand(
 
 public record CreateProductResult(Guid Id);
 
-internal class CreateProductCommandHandler(IDocumentSession session) : ICommandHandler<CreateProductCommand, CreateProductResult>
+internal class CreateProductHandler(IDocumentSession session, ILogger<CreateProductHandler> logger) : ICommandHandler<CreateProductCommand, CreateProductResult>
 {
     public async Task<CreateProductResult> Handle(CreateProductCommand request, CancellationToken cancellationToken)
     {
+        logger.LogInformation("CreateProductHandler.Handler called with {1}", request.Name);
+
         var product = new Product
         {
             Name = request.Name,
