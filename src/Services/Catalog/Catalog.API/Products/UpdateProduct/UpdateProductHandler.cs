@@ -1,6 +1,4 @@
-﻿using Catalog.API.Models;
-
-namespace Catalog.API.Products.UpdateProduct;
+﻿namespace Catalog.API.Products.UpdateProduct;
 
 public record UpdateProductCommand(Guid Id,
     string Name,
@@ -11,17 +9,27 @@ public record UpdateProductCommand(Guid Id,
 
 public record UpdateProductResult(bool IsSuccess);
 
-internal class UpdateProductHandler(IDocumentSession session, ILogger<UpdateProductHandler> logger) : ICommandHandler<UpdateProductCommand, UpdateProductResult>
+public class UpdateProductValidator : AbstractValidator<UpdateProductCommand>
+{
+    public UpdateProductValidator()
+    {
+        RuleFor(command => command.Id).NotEmpty().WithMessage("Product ID is required");
+        RuleFor(command => command.Name)
+            .NotEmpty().WithMessage("Name is required");
+        RuleFor(command => command.Price)
+            .GreaterThan(0).WithMessage("Price must be greater than 0");
+    }
+}
+
+internal class UpdateProductHandler(IDocumentSession session) : ICommandHandler<UpdateProductCommand, UpdateProductResult>
 {
     public async Task<UpdateProductResult> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
     {
-        logger.LogInformation("UpdateProductHandler.Handler called with {1}", request);
-
         var product = await session.LoadAsync<Product>(request.Id, cancellationToken);
 
         if (product is null)
         {
-            throw new ProductNotFoundException();
+            throw new ProductNotFoundException(request.Id);
         }
 
         product.Name = request.Name;
